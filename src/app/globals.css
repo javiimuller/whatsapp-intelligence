@@ -1,26 +1,134 @@
-@import "tailwindcss";
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
-
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+  color-scheme: light;
+  --app-bg: #080b0a;
+  --app-panel: #101513;
+  --app-panel-2: #171d1a;
+  --app-border: rgba(225, 244, 232, 0.1);
+  --app-muted: rgba(238, 250, 242, 0.62);
+  --app-text: #f2f8f4;
+  --app-green: #a6ff3f;
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  background: #f7faf7;
+  color: #17211d;
+  font-family: var(--font-poppins), ui-sans-serif, system-ui, sans-serif;
+}
+
+button,
+input,
+textarea,
+select {
+  font: inherit;
+}
+
+.dashboard-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  gap: 1rem;
+}
+
+.app-dark {
+  min-height: 100vh;
+  background:
+    radial-gradient(circle at 15% 50%, rgba(166, 255, 63, 0.08), transparent 45rem),
+    radial-gradient(circle at 85% 30%, rgba(111, 143, 128, 0.12), transparent 45rem),
+    radial-gradient(circle at 50% 0%, rgba(166, 255, 63, 0.15), transparent 35rem),
+    linear-gradient(180deg, #050706 0%, #0a0d0c 50%, #050706 100%);
+  color: var(--app-text);
+}
+
+.app-dark :is(.bg-white, .bg-\[\#fbfdfb\], .bg-\[\#f7faf7\]) {
+  background-color: rgba(16, 21, 19, 0.88) !important;
+}
+
+.app-dark :is(.bg-\[\#eef5f1\], .bg-\[\#eaf2ed\]) {
+  background-color: rgba(166, 255, 63, 0.1) !important;
+}
+
+.app-dark :is(.text-ink, .text-\[\#17211d\]) {
+  color: var(--app-text) !important;
+}
+
+.app-dark :is(.text-ink\/50, .text-ink\/60, .text-ink\/70, .text-\[\#42504A\], .text-\[\#62706A\]) {
+  color: var(--app-muted) !important;
+}
+
+.app-dark :is(.border-ink\/10, .border-ink\/15, .border-ink\/20, .border-dashed, .border-\[\#DCE4DF\]) {
+  border-color: var(--app-border) !important;
+}
+
+.app-dark :is(.shadow-soft) {
+  box-shadow: 0 24px 70px rgba(0, 0, 0, 0.32);
+}
+
+.app-dark input,
+.app-dark textarea,
+.app-dark select {
+  background: rgba(8, 11, 10, 0.72) !important;
+  border-color: var(--app-border) !important;
+  color: var(--app-text);
+}
+
+.app-dark input::placeholder,
+.app-dark textarea::placeholder {
+  color: rgba(238, 250, 242, 0.38);
+}
+
+.app-dark input.clean-input {
+  background: transparent !important;
+  border-color: transparent !important;
+  box-shadow: none !important;
+}
+
+.app-dark table tbody tr:hover {
+  background: rgba(166, 255, 63, 0.06) !important;
+}
+
+.app-dark .recharts-text {
+  fill: rgba(238, 250, 242, 0.65);
+}
+
+.app-dark .recharts-cartesian-grid line {
+  stroke: rgba(238, 250, 242, 0.08);
+}
+
+.glass-panel {
+  background: linear-gradient(180deg, rgba(20, 27, 24, 0.6), rgba(12, 16, 14, 0.8));
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(225, 244, 232, 0.08);
+  box-shadow: 0 24px 70px rgba(0, 0, 0, 0.4);
+}
+
+.glass-card {
+  background: linear-gradient(145deg, rgba(255, 255, 255, 0.03) 0%, rgba(255, 255, 255, 0.01) 100%);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.2);
+  transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+}
+
+.glass-card:hover {
+  background: linear-gradient(145deg, rgba(255, 255, 255, 0.05) 0%, rgba(255, 255, 255, 0.02) 100%);
+  border: 1px solid rgba(166, 255, 63, 0.3);
+  box-shadow: 0 12px 40px 0 rgba(0, 0, 0, 0.3), 0 0 20px rgba(166, 255, 63, 0.15);
+  transform: translateY(-2px);
+}
+
+.neon-pill {
+  background: linear-gradient(135deg, #a6ff3f, #d6ff75);
+  color: #08100b;
+}
+
+@media print {
+  .app-dark {
+    background: white;
+    color: #17211d;
+  }
 }

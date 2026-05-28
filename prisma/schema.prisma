@@ -1,0 +1,210 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id            String    @id @default(cuid())
+  name          String?
+  email         String    @unique
+  emailVerified DateTime?
+  image         String?
+  passwordHash  String?
+  brands        Brand[]
+  accounts      Account[]
+  sessions      Session[]
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+}
+
+model Account {
+  id                String  @id @default(cuid())
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String?
+  access_token      String?
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String?
+  session_state     String?
+  user              User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model VerificationToken {
+  identifier String
+  token      String   @unique
+  expires    DateTime
+
+  @@unique([identifier, token])
+}
+
+model Brand {
+  id                  String               @id @default(cuid())
+  userId              String
+  name                String
+  industry            String
+  country             String
+  currency            String
+  sellersCount        Int
+  mainChannel         String
+  goal                String
+  user                User                 @relation(fields: [userId], references: [id], onDelete: Cascade)
+  sellers             Seller[]
+  manualAnalyses      ManualAnalysis[]
+  whatsappConnection  WhatsappConnection?
+  conversations       Conversation[]
+  commercialAlerts    CommercialAlert[]
+  monthlyReports      MonthlyReport[]
+  createdAt           DateTime             @default(now())
+  updatedAt           DateTime             @updatedAt
+}
+
+model Seller {
+  id        String   @id @default(cuid())
+  brandId   String
+  name      String
+  brand     Brand    @relation(fields: [brandId], references: [id], onDelete: Cascade)
+  analyses  ManualAnalysis[]
+  conversations Conversation[]
+  createdAt DateTime @default(now())
+}
+
+model ManualAnalysis {
+  id            String         @id @default(cuid())
+  brandId       String
+  name          String
+  period        String
+  sellerId      String?
+  notes         String?
+  status        String         @default("processing")
+  brand         Brand          @relation(fields: [brandId], references: [id], onDelete: Cascade)
+  seller        Seller?        @relation(fields: [sellerId], references: [id])
+  uploadedFiles UploadedFile[]
+  conversations Conversation[]
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
+}
+
+model UploadedFile {
+  id               String         @id @default(cuid())
+  manualAnalysisId String
+  fileName         String
+  mimeType         String
+  fileUrl          String
+  extractedText    String?
+  status           String         @default("uploaded")
+  manualAnalysis   ManualAnalysis @relation(fields: [manualAnalysisId], references: [id], onDelete: Cascade)
+  createdAt        DateTime       @default(now())
+}
+
+model WhatsappConnection {
+  id                   String   @id @default(cuid())
+  brandId              String   @unique
+  wabaId               String
+  phoneNumberId        String
+  accessTokenEncrypted String
+  verifyToken          String
+  status               String   @default("pending")
+  webhookStatus        String   @default("not_verified")
+  lastSyncAt           DateTime?
+  brand                Brand    @relation(fields: [brandId], references: [id], onDelete: Cascade)
+  createdAt            DateTime @default(now())
+  updatedAt            DateTime @updatedAt
+}
+
+model Conversation {
+  id                 String                 @id @default(cuid())
+  brandId            String
+  manualAnalysisId   String?
+  source             String
+  customerAnonymousId String
+  sellerId           String?
+  status             String                 @default("no_clasificada")
+  purchaseIntent     String                 @default("sin_intencion_clara")
+  commercialStage    String?
+  mainObjection      String                 @default("ninguna")
+  lostOpportunity    Boolean                @default(false)
+  recoverable        Boolean                @default(false)
+  riskLevel          String                 @default("medio")
+  summary            String?
+  recommendedAction  String?
+  startedAt          DateTime               @default(now())
+  lastActivityAt     DateTime               @default(now())
+  brand              Brand                  @relation(fields: [brandId], references: [id], onDelete: Cascade)
+  manualAnalysis     ManualAnalysis?        @relation(fields: [manualAnalysisId], references: [id])
+  seller             Seller?                @relation(fields: [sellerId], references: [id])
+  messages           Message[]
+  analyses           ConversationAnalysis[]
+  alerts             CommercialAlert[]
+  createdAt          DateTime               @default(now())
+  updatedAt          DateTime               @updatedAt
+
+  @@index([brandId, source])
+  @@index([manualAnalysisId])
+}
+
+model Message {
+  id                String       @id @default(cuid())
+  conversationId    String
+  externalMessageId String?
+  direction         String
+  messageType       String
+  bodyText          String?
+  timestamp         DateTime
+  status            String?
+  conversation      Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+  createdAt         DateTime     @default(now())
+}
+
+model ConversationAnalysis {
+  id                         String       @id @default(cuid())
+  conversationId             String
+  rawJson                    Json
+  sellerQualityScore         Int
+  followUpDetected           Boolean
+  closingAttemptDetected     Boolean
+  firstResponseTimeMinutes   Int?
+  conversation               Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+  createdAt                  DateTime     @default(now())
+}
+
+model CommercialAlert {
+  id             String        @id @default(cuid())
+  brandId        String
+  conversationId String?
+  type           String
+  title          String
+  description    String
+  severity       String
+  status         String        @default("active")
+  brand          Brand         @relation(fields: [brandId], references: [id], onDelete: Cascade)
+  conversation   Conversation? @relation(fields: [conversationId], references: [id])
+  createdAt      DateTime      @default(now())
+}
+
+model MonthlyReport {
+  id        String   @id @default(cuid())
+  brandId   String
+  period    String
+  summary   String
+  rawJson   Json
+  brand     Brand    @relation(fields: [brandId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+}
